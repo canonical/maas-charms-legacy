@@ -1,0 +1,4 @@
+name: maas-rpc
+summary: Interface used by for maas-rack can connect to maas-region.
+version: 1
+maintainer: "MAAS Maintainers <maas-devel@canonical.com>"

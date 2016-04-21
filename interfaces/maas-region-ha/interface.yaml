@@ -1,0 +1,4 @@
+name: maas-region-ha
+summary: Interface used by MAAS region units
+version: 1
+maintainer: "MAAS Maintainers <maas-devel@canonical.com>"
