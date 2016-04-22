@@ -1,0 +1,15 @@
+series: xenial
+services:
+  postgresql:
+    charm: "cs:trusty/postgresql-41"
+  "maas-region":
+    charm: "local:xenial/maas-region-3"
+    options:
+      "admin-password": test
+  "maas-rack":
+    charm: "local:xenial/maas-rack-0"
+relations:
+  - - "maas-region:db"
+    - "postgresql:db"
+  - - "maas-region:rpc"
+    - "maas-rack:rpc"

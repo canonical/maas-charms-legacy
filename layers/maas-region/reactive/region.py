@@ -691,7 +691,8 @@ def update_vip_config():
         keepalived_pass = leadership.leader_get('keepalived_pass')
         if not keepalived_pass:
             if hookenv.is_leader():
-                keepalived_pass = host.pwgen()
+                # keepalived maximum length is 8 characters
+                keepalived_pass = host.pwgen(length=8)
                 leadership.leader_set(keepalived_pass=keepalived_pass)
             else:
                 hookenv.status_set(
@@ -702,11 +703,13 @@ def update_vip_config():
         # Get the interface that should be used for the VIP.
         interface = get_interface_for_ip(vip)
 
-        # Write the keepalived.conf.
+        # Write the keepalived.conf. The priority is set based on the unit
+        # number. Juju starts unit numbers at 0 where keepalived starts at 1,
+        # so the unit number is increased by 1 for every unit.
         templating.render(
             'keepalived.conf', '/etc/keepalived/keepalived.conf', {
                 'interface': interface,
-                'priority': hookenv.local_unit().split('/')[1],
+                'priority': int(hookenv.local_unit().split('/')[1]) + 1,
                 'virtual_router_id': hookenv.config('keepalived-router-id'),
                 'auth_pass': keepalived_pass,
                 'vip': vip,
