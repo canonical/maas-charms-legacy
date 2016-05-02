@@ -5,6 +5,8 @@ description: |
   MAAS runs a software-defined data centre - it turns a collection of physical
   servers and switches into a bare metal cloud with full open source IP address
   management (IPAM) and instant provisioning on demand.
+series:
+  - xenial
 tags:
   - network
 requires:
