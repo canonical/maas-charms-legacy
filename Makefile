@@ -1,26 +1,13 @@
-# `charm build` needs the paths to INTERFACES and LAYERS.
-export INTERFACE_PATH := $(CURDIR)/interfaces
-export LAYER_PATH := $(CURDIR)/layers
 
 all: build
 
+build:
+	@$(MAKE) -C charms
+
+clean:
+	@rm -rf builds
+
 install-dependencies:
-	sudo DEBIAN_FRONTEND=noninteractive apt-get -y \
-		--no-install-recommends install charm-tools
+	sudo snap install charm --classic
 
-build: maas-region maas-rack
-
-
-maas-region:
-	charm build -s xenial maas-region -o .
-
-maas-rack:
-	charm build -s xenial maas-rack -o .
-
-test: build test-maas-region test-maas-rack
-
-test-maas-region:
-	charm proof xenial/maas-region
-
-test-maas-rack:
-	charm proof xenial/maas-rack
+.PHONY: all build install-dependencies

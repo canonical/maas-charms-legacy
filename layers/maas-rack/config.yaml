@@ -1,7 +1,0 @@
-options:
-  ppa:
-    type: string
-    default: ''
-    description: |
-      PPA to added before installing MAAS. This needs to be set before during
-      deployment. Changing after initial deployment has no affect.

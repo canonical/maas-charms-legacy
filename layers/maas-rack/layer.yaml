@@ -1,5 +1,0 @@
-includes: [
-    'layer:basic',
-    'interface:maas-rpc',
-]
-repo: https://code.launchpad.net/~maas-committers/maas/maas-charms

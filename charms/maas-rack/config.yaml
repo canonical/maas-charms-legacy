@@ -1,0 +1,6 @@
+options:
+  debug:
+    type: boolean
+    default: false
+    description: |
+      Enable DEBUG mode level logging. *Reduces performance*

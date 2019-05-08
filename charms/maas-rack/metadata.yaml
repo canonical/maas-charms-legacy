@@ -1,20 +1,16 @@
-name: maas-region
-summary: Region controller for MAAS.
+name: maas-rack
+summary: Rack controller for MAAS.
 maintainer: MAAS Maintainers <maas-devel@canonical.com>
 description: |
   MAAS runs a software-defined data centre - it turns a collection of physical
   servers and switches into a bare metal cloud with full open source IP address
   management (IPAM) and instant provisioning on demand.
+subordinate: false
 series:
+  - bionic
   - xenial
 tags:
   - network
-peers:
-  ha:
-    interface: maas-region-ha
-provides:
+requires:
   rpc:
     interface: maas-rpc
-requires:
-  db:
-    interface: pgsql

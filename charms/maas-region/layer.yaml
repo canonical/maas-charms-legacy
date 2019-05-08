@@ -1,0 +1,19 @@
+repo: https://github.com/maas/maas-charms
+includes:
+  - layer:basic
+  - layer:leadership
+  - layer:snap
+  - interface:http
+  - interface:maas-region-ha
+  - interface:maas-rpc
+  - interface:pgsql
+options:
+  snap:
+    maas:
+      channel: edge
+      devmode: true
+resources:
+  snap:
+    type: file
+    filename: maas.snap
+    description: MAAS snap

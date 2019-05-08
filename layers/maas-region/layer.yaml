@@ -1,8 +1,0 @@
-includes: [
-    'layer:basic',
-    'layer:leadership',
-    'interface:maas-region-ha',
-    'interface:maas-rpc',
-    'interface:pgsql',
-]
-repo: https://code.launchpad.net/~maas-committers/maas/maas-charms

@@ -1,0 +1,15 @@
+options:
+  dbname:
+    type: string
+    default: maas
+    description: Name of the database to use when related to PostgreSQL.
+  maas-url:
+    type: string
+    default: 'http://localhost:5240/MAAS'
+    description: |
+      URL that rack controllers connect get RPC information and deploying
+      machines use for metadata, APT proxy, and DNS.
+      .
+      It is recommended to leave this unset. In a multi unit deployment the
+      maas_url in the regiond.conf will be set to the leader unit for the
+      service unless this is set to override that value.
