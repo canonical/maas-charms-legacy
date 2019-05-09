@@ -55,6 +55,13 @@ juju add-relation maas-region postgesql:db
 juju add-relation maas-region maas-rack
 ```
 
+A simple bundle is provided in this repository to quickly get a MAAS deployed
+with 2 units each.
+
+```
+juju deploy ./bundle.yaml
+```
+
 ## Scale out Usage
 
 MAAS internally handles the HA configuration and strategy so its as simple
