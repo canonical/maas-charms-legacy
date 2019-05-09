@@ -1,15 +1,17 @@
-series: xenial
-services:
+description: "A simple MAAS deployment."
+series: bionic
+applications:
   postgresql:
-    charm: "cs:trusty/postgresql-41"
-  "maas-region":
-    charm: "local:xenial/maas-region-3"
-    options:
-      "admin-password": test
-  "maas-rack":
-    charm: "local:xenial/maas-rack-0"
+    charm: "cs:postgresql"
+    num_units: 1
+  maas-region:
+    charm: "./builds/maas-region"
+    num_units: 2
+  maas-rack:
+    charm: "./builds/maas-rack"
+    num_units: 2
 relations:
-  - - "maas-region:db"
-    - "postgresql:db"
+  - - "postgresql:db"
+    - "maas-region:db"
   - - "maas-region:rpc"
     - "maas-rack:rpc"

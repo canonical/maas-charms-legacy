@@ -4,7 +4,6 @@ includes:
   - layer:leadership
   - layer:snap
   - interface:http
-  - interface:maas-region-ha
   - interface:maas-rpc
   - interface:pgsql
 options:

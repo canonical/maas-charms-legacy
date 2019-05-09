@@ -11,10 +11,9 @@ series:
   - xenial
 tags:
   - network
-peers:
-  ha:
-    interface: maas-region-ha
 provides:
+  http:
+    interface: http
   rpc:
     interface: maas-rpc
 requires:

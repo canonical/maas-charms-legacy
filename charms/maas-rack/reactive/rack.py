@@ -16,58 +16,58 @@ from charms.reactive import (
 )
 
 
-@when('snap.installed.maas', 'rpc.rpc.available', 'maas.snap.init')
+@when('snap.installed.maas')
+@when_not('endpoint.rpc.joined')
+def stop_rackd():
+    hookenv.status_set('blocked', 'Waiting on relation to maas-region')
+
+
+@when('maas.snap.init', 'endpoint.rpc.changed')
 def update_rackd_config(rpc):
-    rpc_maas_url = rpc.maas_url()
-    if rpc_maas_url is None:
-        rpc_maas_url = ''
-    rpc_secret = rpc.secret()
-    if rpc_secret is None:
-        rpc_secret = ''
-    hookenv.status_set('maintenance', 'Configuring communcation with maas-region(s)')
+    secret, maas_urls = rpc.regions()
+    hookenv.status_set('maintenance', 'Configuring communication with maas-region(s)')
     check_call([
         'maas', 'config',
         '--mode', 'rack',
-        '--maas-url', rpc_maas_url,
-        '--secret', rpc_secret])
-    hookenv.status_set('active')
+        '--maas-url', maas_urls[0],
+        '--secret', secret])
+    clear_flag('endpoint.rpc.changed')
+    hookenv.status_set('active', 'Running')
 
 
-@when('snap.installed.maas', 'rpc.rpc.available')
+@when('snap.installed.maas', 'endpoint.rpc.joined')
 @when_not('maas.snap.init')
 def update_rackd_config(rpc):
-    rpc_maas_url = rpc.maas_url()
-    if rpc_maas_url is None:
-        rpc_maas_url = ''
-    rpc_secret = rpc.secret()
-    if rpc_secret is None:
-        rpc_secret = ''
+    secret, maas_urls = rpc.regions()
     hookenv.status_set('maintenance', 'Initializing rack controller')
     check_call([
         'maas', 'init',
         '--mode', 'rack',
-        '--maas-url', rpc_maas_url,
-        '--secret', rpc_secret])
-    hookenv.status_set('active')
+        '--maas-url', maas_urls[0],
+        '--secret', secret])
+    hookenv.status_set('active', 'Running')
     set_flag('maas.snap.init')
 
 
-@when('snap.installed.maas')
-@when_not('rpc.rpc.available')
+@when('maas.snap.init')
+@when_not('endpoint.rpc.joined')
 def stop_rackd():
     hookenv.status_set('maintenance', 'Stopping communcation with maas-region(s)')
     check_call([
         'maas', 'config', '--mode', 'none'])
     clear_flag('maas.snap.init')
-    hookenv.status_set('blocked', 'Waiting on relation to maas-region')
 
 
 @when('maas.snap.init', 'config.set.debug')
 def toggle_debug():
     hookenv.status_set('maintenance', 'Configuring debug mode')
-    check_call([
-        'maas', 'config', '--debug', hookenv.config('debug')])
-    hookenv.status_set('active')
+    if hookenv.config('debug'):
+        check_call([
+            'maas', 'config', '--enable-debug'])
+    else:
+        check_call([
+            'maas', 'config', '--disable-debug'])
+    hookenv.status_set('active', 'Running')
 
 
 @hook('update-status')
@@ -91,5 +91,5 @@ def update_status():
     #    elif dhcpd6_running:
     #        hookenv.status_set('active', 'Providing DHCPv6')
     #    else:
-    #        hookenv.status_set('active', 'Ready')
+    #        hookenv.status_set('active', 'Running')
     pass
