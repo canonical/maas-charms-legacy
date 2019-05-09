@@ -60,8 +60,10 @@ juju add-relation maas-region maas-rack
 MAAS internally handles the HA configuration and strategy so its as simple
 as scaling out the regions and racks.
 
-`juju add-unit maas-region -n 1`
-`juju add-unit maas-rack -n 1`
+```
+juju add-unit maas-region -n 1
+juju add-unit maas-rack -n 1
+```
 
 ## Known Limitations and Issues
 
