@@ -16,6 +16,10 @@ provides:
     interface: http
   rpc:
     interface: maas-rpc
+  migrate-out:
+    interface: maas-migrate
 requires:
   db:
     interface: pgsql
+  migrate-in:
+    interface: maas-migrate

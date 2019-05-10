@@ -1,0 +1,4 @@
+name: maas-migrate
+summary: Interface used between two different MAAS regions to migrate the state.
+version: 1
+maintainer: "MAAS Maintainers <maas-devel@canonical.com>"

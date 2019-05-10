@@ -6,6 +6,7 @@ includes:
   - interface:http
   - interface:maas-rpc
   - interface:pgsql
+  - interface:maas-migrate
 options:
   snap:
     maas:
