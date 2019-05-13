@@ -47,7 +47,11 @@ def get_snap_config_value(*args):
     Return the current mode of the snap.
     """
     output = check_output([
-        'maas', 'config', '--show', '--parsable'])
+        'maas', 'config',
+        '--show',
+        '--show-database-password',
+        '--show-secret',
+        '--parsable'])
     output = output.decode('utf-8')
     lines = output.splitlines()
     res = []
@@ -86,19 +90,13 @@ def get_snap_mode(mode):
         if current_mode == 'none':
             return 'region'
         if current_mode == 'rack':
-            return 'rack'
+            return 'region+rack'
         if current_mode == 'region':
             return 'region'
         if current_mode == 'region+rack':
             return 'region+rack'
         raise ValueError('Unknown operating mode: %s', current_mode)
     raise ValueError('Unknown operating mode: %s', current_mode)
-
-
-def get_maas_secret():
-    """Return the MAAS secret value."""
-    with open('/var/snap/maas/current/var/lib/maas/secret', 'r') as fp:
-        return fp.read().strip()
 
 
 def get_maas_url():
@@ -108,20 +106,39 @@ def get_maas_url():
     return 'http://localhost:5240/MAAS'
 
 
+def get_snap_args(mode, pgsql):
+    set_mode = get_snap_mode(mode)
+    args = ['--mode', set_mode]
+    maas_url_set = False
+    if set_mode != 'none' and set_mode != 'rack':
+        conn_str = pgsql.master
+        args += [
+            '--database-host', conn_str['host'],
+            '--database-name', conn_str['dbname'],
+            '--database-user', conn_str['user'],
+            '--database-pass', conn_str['password'],
+            '--maas-url', get_maas_url(),
+        ]
+        maas_url_set = True
+    if set_mode == 'region+rack' or set_mode == 'rack':
+        secret, maas_url = get_snap_config_value('secret', 'maas_url')
+        if not maas_url_set:
+            args.append('--maas-url')
+            args.append(maas_url)
+        args.append('--secret')
+        args.append(get_snap_config_value('secret'))
+    return args
+
+
+def get_maas_secret():
+    """Return the MAAS secret value."""
+    return get_snap_config_value('secret')
+
+
 def is_maas_url_local(maas_url):
     if maas_url == 'http://localhost:5240/MAAS':
         return True
     return False
-
-
-def get_database_flags(pgsql):
-    conn_str = pgsql.master
-    return [
-        '--database-host', conn_str['host'],
-        '--database-name', conn_str['dbname'],
-        '--database-user', conn_str['user'],
-        '--database-pass', conn_str['password'],
-    ]
 
 
 @when('snap.installed.maas')
@@ -134,10 +151,10 @@ def missing_postgresql():
 def write_maas_url():
     hookenv.status_set('maintenance', 'Re-configuring controller')
     with lock_snap_context():
-        check_call([
-            'maas', 'config', '--mode', get_snap_mode('region'),
-            '--maas-url', get_maas_url()] + get_database_flags(
-                endpoint_from_flag('db.database.available')))
+        check_call(
+            ['maas', 'config'] +
+            get_snap_args(
+                'region', endpoint_from_flag('db.database.available')))
     hookenv.status_set('active')
 
 
@@ -146,7 +163,7 @@ def write_maas_url():
 def disable_snap():
     hookenv.status_set('maintenance', 'Turning off controller')
     with lock_snap_context():
-        check_call(['maas', 'config', '--mode', get_snap_mode('none')])
+        check_call(['maas', 'config'] + get_snap_args('none', None))
     clear_flag('maas.snap.init')
 
 
@@ -154,9 +171,8 @@ def disable_snap():
 def write_db_config(pgsql):
     hookenv.status_set('maintenance', 'Configuring connection to database')
     with lock_snap_context():
-        check_call([
-            'maas', 'config', '--mode', get_snap_mode('region'),
-            '--maas-url', get_maas_url()] + get_database_flags(pgsql))
+        check_call(
+            ['maas', 'config'] + get_snap_args('region', pgsql))
     clear_flag('db.master.changed')
     hookenv.status_set('active', 'Running')
 
@@ -166,12 +182,9 @@ def write_db_config(pgsql):
 def init_db(pgsql):
     hookenv.status_set('maintenance', 'Initializing connection to database')
     with lock_snap_context():
-        check_call([
-            'maas', 'init',
-            '--force',
-            '--mode', get_snap_mode('region'),
-            '--skip-admin',
-            '--maas-url', get_maas_url()] + get_database_flags(pgsql))
+        check_call(
+            ['maas', 'init', '--force', '--skip-admin'] +
+            get_snap_args('region', pgsql))
     set_flag('maas.snap.init')
     clear_flag('db.master.changed')
     hookenv.status_set('active', 'Running')
