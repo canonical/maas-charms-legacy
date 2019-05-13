@@ -1,10 +1,26 @@
 # Copyright 2016-2019 Canonical Ltd.  This software is licensed under the
 # GNU Affero General Public License version 3 (see the file LICENSE).
 
-from charms.reactive import Endpoint
+from charms.reactive import clear_flag, Endpoint, hook, set_flag
 
 
 class MAASRPCClient(Endpoint):
+
+    @hook('{requires:maas-rpc}-relation-{changed,joined}')
+    def changed_joined(self):
+        self.toggle_available()
+
+    @hook('{provides:maas-rpc}-relation-{departed,broken}')
+    def departed_broken(self):
+        self.toggle_available()
+
+    def toggle_available(self):
+        """Sets that the relationship is available."""
+        secret, urls = self.regions()
+        if secret and len(urls) > 0:
+            set_flag(self.expand_name('{relation_name}.available'))
+        else:
+            clear_flag(self.expand_name('{relation_name}.available'))
 
     def regions(self):
         """

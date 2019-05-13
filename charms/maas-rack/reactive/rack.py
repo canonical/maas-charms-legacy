@@ -114,13 +114,13 @@ def get_snap_args(mode, secret=None, maas_urls=None):
 
 
 @when('snap.installed.maas')
-@when_not('endpoint.rpc.joined')
+@when_not('rpc.available')
 def stop_rackd():
     hookenv.status_set('blocked', 'Waiting on relation to maas-region')
 
 
-@when('maas.snap.init', 'endpoint.rpc.changed')
-def update_rackd_config(rpc):
+@when('maas.snap.init', 'endpoint.rpc.changed', 'rpc.available')
+def update_rackd_config(rpc, _):
     secret, maas_urls = rpc.regions()
     hookenv.status_set('maintenance', 'Configuring communication with maas-region(s)')
     with lock_snap_context():
@@ -130,7 +130,7 @@ def update_rackd_config(rpc):
     hookenv.status_set('active', 'Running')
 
 
-@when('snap.installed.maas', 'endpoint.rpc.joined')
+@when('snap.installed.maas', 'rpc.available')
 @when_not('maas.snap.init')
 def update_rackd_config(rpc):
     secret, maas_urls = rpc.regions()
@@ -149,7 +149,7 @@ def update_rackd_config(rpc):
 
 
 @when('maas.snap.init')
-@when_not('endpoint.rpc.joined')
+@when_not('rpc.available')
 def stop_rackd():
     hookenv.status_set('maintenance', 'Stopping communcation with maas-region(s)')
     with lock_snap_context():
