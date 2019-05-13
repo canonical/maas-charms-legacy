@@ -42,6 +42,16 @@ def lock_snap_context():
         os.close(fd)
 
 
+def get_maas_secret():
+    """Return the MAAS secret value."""
+    secret = None
+    with open('/var/snap/maas/current/var/lib/maas/secret', 'r') as fp:
+        secret = fp.read().strip()
+    if not secret:
+        return None
+    return secret
+
+
 def get_snap_config_value(*args):
     """
     Return the current mode of the snap.
@@ -65,7 +75,10 @@ def get_snap_config_value(*args):
                 found = True
                 break
         if not found:
-            res.append(None)
+            if key == 'secret':
+                res.append(get_maas_secret())
+            else:
+                res.append(None)
     if len(res) == 1:
         return res[0]
     return res
@@ -130,11 +143,6 @@ def get_snap_args(mode, pgsql):
     return args
 
 
-def get_maas_secret():
-    """Return the MAAS secret value."""
-    return get_snap_config_value('secret')
-
-
 def is_maas_url_local(maas_url):
     if maas_url == 'http://localhost:5240/MAAS':
         return True
@@ -195,7 +203,7 @@ def rpc_requested(rpc):
     maas_url = get_maas_url()
     if is_maas_url_local(maas_url):
         maas_url = 'http://%s:5240/MAAS' % hookenv.unit_private_ip()
-    secret = get_maas_secret()
+    secret = get_snap_config_value('secret')
     rpc.set_connection_info(maas_url, secret)
 
 
