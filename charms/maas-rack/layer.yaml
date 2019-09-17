@@ -7,7 +7,6 @@ options:
   snap:
     maas:
       channel: edge
-      devmode: true
 resources:
   snap:
     type: file
