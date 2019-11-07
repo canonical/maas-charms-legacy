@@ -51,7 +51,7 @@ Only external requirement for running MAAS is a PostgreSQL database.
 juju deploy postgresql
 juju deploy ./builds/maas-region
 juju deploy ./builds/maas-rack
-juju add-relation maas-region postgesql:db
+juju add-relation maas-region postgresql:db
 juju add-relation maas-region maas-rack
 ```
 
